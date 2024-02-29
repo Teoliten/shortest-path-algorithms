@@ -5,3 +5,4 @@ NODE
 
 NETWORK
 -vector nodesInNetwork, id and pointer to node
+-function addConnection, id's of nodes to connect, value of the connection
