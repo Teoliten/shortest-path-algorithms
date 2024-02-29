@@ -3,21 +3,30 @@
 
 using namespace std;
 
+// ------------ NODE ------------
+
 class Node
 {
 public:
-  int id;
-  vector<pair<int, Node *>> connectedNodes; // List of value and pointer pair
-
   Node(int id) : id(id) {} // Constructor
 
   // Add a function to connect this node to another node
-  void connect(Node *other, int value)
-  {
-    connectedNodes.push_back(make_pair(value, other));
-  }
+  void connect(int value, Node *other);
+  // friend class Network;
+  int getId() const { return id; }
+
+private:
+  int id;
+  vector<pair<int, Node *>> connectedNodes; // List of value and pointer pair
 };
 
+void Node::connect(int value, Node *other)
+{
+  connectedNodes.push_back(make_pair(value, other));
+} // connect
+// ------------ NODE ------------
+
+// ------------ NETWORK ------------
 class Network
 {
 public:
@@ -26,14 +35,18 @@ public:
 
   void addNode(int id, int value);
 
+private:
+  vector<pair<int, Node *>> nodesInNetwork; // id, pointer to node
   int nodes;
   Node *root;
 };
 
 Network::Network()
 {
-  nodes = 0;      // Initialize to 0, we increment it when adding nodes
-  root = nullptr; // Initialize to nullptr
+  Node *rootNode = new Node(0);
+  nodesInNetwork.push_back(make_pair(0, rootNode));
+  nodes = 1;
+  root = rootNode;
 }
 
 Network::~Network()
@@ -41,58 +54,47 @@ Network::~Network()
   // Implement destructor if necessary
 }
 
-void Network::addNode(int id, int value)
+void Network::addNode(int id, int value) // id to connect to, value of the connection
 {
   // Create a new node
-  Node *newNode = new Node(id);
+  Node *newNode = new Node(nodes);
 
-  if (!root)
+  // Search for a node with the given ID in nodesInNetwork
+  for (auto &pair : nodesInNetwork)
   {
-    root = newNode; // If root is nullptr, set the new node as root
-  }
-  else
-  {
-    // Connect the new node to the previous node
-    Node *prevNode = root;
-    while (!prevNode->connectedNodes.empty())
+    if (pair.first == id)
     {
-      prevNode = prevNode->connectedNodes[0]; // Follow the chain of connections
+      cout << "found" << endl;
+      // Connect the newly created node to the found node
+      pair.second->connect(id, newNode);
+      break; // Exit loop since we found the node
     }
-    prevNode->connect(newNode);
+    else
+    {
+      cout << "not found" << endl;
+    }
   }
 
-  nodes++; // Increment the node count
+  // Increment the node count
+  nodes++;
+
+  // Add the new node to the nodesInNetwork vector
+  nodesInNetwork.push_back(make_pair(nodes - 1, newNode));
 }
 
+// ------------ NETWORK ------------
+
+// ------------ MAIN ------------
 int main()
 {
   // Create a network
   Network network;
 
   // Add nodes
-  network.addNode(0, 0);
-  network.addNode(1, 5);
-  network.addNode(2, 8);
-
-  // Print connections (just for visualization)
-  Node *current = network.root;
-  while (current)
-  {
-    cout << "Node " << current->id << " is connected to: ";
-    for (Node *connected : current->connectedNodes)
-    {
-      cout << connected->id << " ";
-    }
-    cout << endl;
-    if (!current->connectedNodes.empty())
-    {
-      current = current->connectedNodes[0];
-    }
-    else
-    {
-      current = nullptr;
-    }
-  }
+  network.addNode(0, 420);
+  // network.addNode(1, 421);
+  // network.addNode(2, 422);
 
   return 0;
-}
+} // main
+  // ------------ MAIN ------------
