@@ -1,0 +1,7 @@
+NODE
+-id
+-vector connectedNodes, pair of value and pointer to node
+-function connect, parameters: value and pointer
+
+NETWORK
+-vector nodesInNetwork, id and pointer to node
