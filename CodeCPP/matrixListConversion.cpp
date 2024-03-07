@@ -1,11 +1,10 @@
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 void printMatrix(vector<vector<int>> matrix)
 {
-  cout << "Matrix: " << endl;
+  cout << "Adjacency Matrix: " << endl;
   for (int i = 0; i < matrix.size(); i++)
   {
     for (int j = 0; j < matrix.size(); j++)
@@ -16,9 +15,31 @@ void printMatrix(vector<vector<int>> matrix)
   }
 } // printMatrix
 
-// void matrixToList()
-// {
-// }
+void printList(const vector<vector<pair<int, int>>>& adjList) {
+    cout << "Adjacency List: " << endl;
+    for (int i = 0; i < adjList.size(); i++) {
+        cout << "Node " << i << ": ";
+        for (const auto& pair : adjList[i]) {
+            cout << "(" << pair.first << ", " << pair.second << ") ";
+        }
+        cout << endl;
+    }
+}
+
+vector<vector<pair<int, int>>> matrixToList(const vector<vector<int>>& matrix) {
+    int nodes = matrix.size();
+    vector<vector<pair<int, int>>> adjList(nodes);
+
+    for (int i = 0; i < nodes; ++i) {
+        for (int j = 0; j < nodes; ++j) {
+            if (matrix[i][j] != 0) {
+                adjList[i].push_back(make_pair(j, matrix[i][j]));
+            }
+        }
+    }
+
+    return adjList;
+}
 
 vector<vector<int>> listToMatrix(const vector<vector<pair<int, int>>> &adjList)
 {
@@ -57,6 +78,9 @@ int main()
 
   vector<vector<int>> resultMatrix = listToMatrix(adjList); // Transform adjacency list to matrix
   printMatrix(resultMatrix);                                // print generated matrix
+
+  vector<vector<pair<int, int>>> new_adjList = matrixToList(matrix);  // Transform matrix to adjacency list
+  printList(new_adjList);                                    // print generated list
 
   return 0;
 
