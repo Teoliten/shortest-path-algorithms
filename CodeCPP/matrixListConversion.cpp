@@ -2,86 +2,116 @@
 
 using namespace std;
 
-void printMatrix(vector<vector<int>> matrix)
+void printMatrix(const vector<vector<int>>& matrix)
 {
-  cout << "Adjacency Matrix: " << endl;
-  for (int i = 0; i < matrix.size(); i++)
-  {
-    for (int j = 0; j < matrix.size(); j++)
-    {
-      cout << matrix[i][j] << " ";
-    }
-    cout << endl;
-  }
-} // printMatrix
-
-void printList(const vector<vector<pair<int, int>>>& adjList) {
-    cout << "Adjacency List: " << endl;
-    for (int i = 0; i < adjList.size(); i++) {
-        cout << "Node " << i << ": ";
-        for (const auto& pair : adjList[i]) {
-            cout << "(" << pair.first << ", " << pair.second << ") ";
-        }
-        cout << endl;
+	cout << "Adjacency Matrix: " << endl;
+	for (const auto& row : matrix)
+	{
+		for (int weight : row)
+		{
+			cout << weight << " ";
+		}
+	cout << endl;
     }
 }
 
-vector<vector<pair<int, int>>> matrixToList(const vector<vector<int>>& matrix) {
-    int nodes = matrix.size();
-    vector<vector<pair<int, int>>> adjList(nodes);
-
-    for (int i = 0; i < nodes; ++i) {
-        for (int j = 0; j < nodes; ++j) {
-            if (matrix[i][j] != 0) {
-                adjList[i].push_back(make_pair(j, matrix[i][j]));
-            }
-        }
-    }
-
-    return adjList;
+void printList(const vector<vector<pair<int, int>>>& adjList)
+{
+	cout << "Adjacency List: " << endl;
+	for (int i = 0; i < adjList.size(); i++)
+	{
+		cout << "Node " << i << ": ";
+		for (const auto& pair : adjList[i])
+		{
+			cout << "(" << pair.first << ", " << pair.second << ") ";
+		}
+		cout << endl;
+	}
 }
 
-vector<vector<int>> listToMatrix(const vector<vector<pair<int, int>>> &adjList)
+vector<vector<pair<int, int>>> matrixToList(const vector<vector<int>>& matrix)
 {
-  int nodes = adjList.size();
-  vector<vector<int>> newMatrix(nodes, vector<int>(nodes, 0)); // create new n*n matrix initialized with 0s
+	int nodes = matrix.size();
+	vector<vector<pair<int, int>>> adjList(nodes);
 
-  for (int i = 0; i < nodes; i++)
-  {
-    for (int j = 0; j < adjList[i].size(); j++)
-    {
-      newMatrix[i][adjList[i][j].first] = adjList[i][j].second;
-    }
-  }
+	for (int i = 0; i < nodes; ++i)
+	{
+		for (int j = 0; j < nodes; ++j)
+		{
+			if (matrix[i][j] != 0)
+			{
+				adjList[i].push_back(make_pair(j, matrix[i][j]));
+			}
+		}
+	}
 
-  return newMatrix;
-} // listToMatrix
+	return adjList;
+}
+
+vector<vector<int>> listToMatrix(const vector<vector<pair<int, int>>>& adjList) {
+	int nodes = adjList.size();
+	vector<vector<int>> newMatrix(nodes, vector<int>(nodes, 0));
+
+	for (int i = 0; i < nodes; i++)
+	{
+		for (const auto& edge : adjList[i])
+		{
+			newMatrix[i][edge.first] = edge.second;
+		}
+	}
+
+	return newMatrix;
+}
 
 int main()
 {
-  // same network of 4 nodes 8 edges represented in both matrix and adjacency list, to check for correct expected output
-  vector<vector<int>> matrix =
-      {
-          {0, 3, 5, 0},
-          {1, 0, 0, 9},
-          {0, 4, 0, 0},
-          {4, 2, 2, 0}}; // 4x4 matrix, containing network of 4 nodes and 8 edges with weights.
+	// Read input from graph.txt and construct adjacency matrix and list
+	ifstream inputFile("graph.txt");
+	if (!inputFile)
+	{
+		cerr << "Error: Unable to open input file graph.txt\n";
+		return 1;
+	}
 
-  vector<vector<pair<int, int>>> adjList = {
-      // 4 nodes, 8 edges with weights
-      {{1, 3}, {2, 5}},          // Node 0: (1,3), (2, 5)
-      {{0, 1}, {3, 9}},          // Node 1: (0, 1)
-      {{1, 4}},                  // Node 2: (1, 4)
-      {{1, 2}, {2, 2}, {0, 4}}}; // Node 3: (1, 2), (2, 2), (0, 4)
+	vector<vector<int>> matrix;
+	vector<vector<pair<int, int>>> adjList;
+	int numVertices = 0;
 
-  // --------------------------------------
+	// Create a map to map vertex IDs to indices in the adjacency list
+	map<int, int> vertexIndices;
 
-  vector<vector<int>> resultMatrix = listToMatrix(adjList); // Transform adjacency list to matrix
-  printMatrix(resultMatrix);                                // print generated matrix
+	int source, neighbor, weight;
+	while (inputFile >> source >> neighbor >> weight)
+	{
+		// Update the number of vertices if necessary
+		numVertices = max(numVertices, max(source, neighbor) + 1);
 
-  vector<vector<pair<int, int>>> new_adjList = matrixToList(matrix);  // Transform matrix to adjacency list
-  printList(new_adjList);                                    // print generated list
+		// Resize matrix and adjacency list if necessary
+		if (numVertices > matrix.size())
+		{
+			matrix.resize(numVertices, vector<int>(numVertices, 0));
+			adjList.resize(numVertices);
+		}
 
-  return 0;
+		// Update matrix and adjacency list
+		matrix[source][neighbor] = weight;
+		adjList[source].push_back({neighbor, weight});
+	}
+	inputFile.close();
 
-} // main
+	// Print original matrix and list
+	printMatrix(matrix);
+	printList(adjList);
+
+	// Transform adjacency list to matrix
+	vector<vector<int>> resultMatrix = listToMatrix(adjList);
+	cout << "\nTransformed to Matrix:" << endl;
+	printMatrix(resultMatrix);
+
+	// Transform matrix to adjacency list
+	vector<vector<pair<int, int>>> newAdjList = matrixToList(matrix);
+	cout << "\nTransformed to List:" << endl;
+	printList(newAdjList);
+
+	return 0;
+}
